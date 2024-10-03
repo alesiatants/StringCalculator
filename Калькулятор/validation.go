@@ -2,7 +2,6 @@ package main
 import (
 	"strings"
 	"regexp"
-
 )
 // функция для проверки корректности выражения
 func IsValidExpression(expression string) bool {
@@ -10,7 +9,9 @@ func IsValidExpression(expression string) bool {
 	if !regexp.MustCompile(`^[0-9\+\-\*\/\(\)\. ]+$`).MatchString(expression) {
 		return false
 	}
-	
+	if !regexp.MustCompile(`[^+\-*/]$`).MatchString(expression) {
+		return false
+	}
 	expressionNoSpaces := strings.ReplaceAll(expression, " ", "")
 	// проверка на содержание цифр перед закрывающимися скобками
 	if strings.ContainsRune(expressionNoSpaces, 41){
@@ -19,21 +20,17 @@ func IsValidExpression(expression string) bool {
 			return false
 		}
 	}
-	
 	// проверка на правильное использование круглых скобок (по количеству)
 	if !IsValidBrackets(expression) {
 		return false
 	}
-
 	return true
 }
-
 // функция для проверки правильного использования круглых скобок
 func IsValidBrackets(expression string) bool {
 	// подсчет количества открывающих и закрывающих скобок
 	openBrackets := strings.Count(expression, "(")
 	closeBrackets := strings.Count(expression, ")")
-
 	// проверка на равенство количества открывающих и закрывающих скобок
 	if openBrackets != closeBrackets {
 		return false
@@ -50,8 +47,6 @@ func IsValidBrackets(expression string) bool {
 				}
 				stack = stack[:len(stack)-1]
 			}
-		}
-		
+		}	
 	return true
 }
-
