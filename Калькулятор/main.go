@@ -6,11 +6,14 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"log"
+	"io"
 )
 
 func main() {
 
 	reader := bufio.NewReader(os.Stdin)
+	file, err_open := os.OpenFile("logfile.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 
 	for {
 
@@ -23,39 +26,61 @@ func main() {
     `)
 		fmt.Print(">>> ")
 
-		choiceStr, _ := reader.ReadString('\n')
+		choiceStr, err_read := reader.ReadString('\n')
+		if err_read != nil {
+			mw := io.MultiWriter(os.Stdout, file)
+				log.SetOutput(mw)
+			fmt.Println("Ошибка при чтении ввода:", err_read)
+			continue // Продолжаем цикл, если возникла ошибка
+		}
 		choiceStr = strings.TrimSpace(choiceStr)
 		choice, err := strconv.Atoi(choiceStr)
 
 		if err != nil {
-
-			fmt.Println("Неверный ввод!")
+		
+			if err_open == nil {
+				mw := io.MultiWriter(os.Stdout, file)
+				log.SetOutput(mw)
+				
+				// перенаправление вывода логов в файл logfile.log
+				log.Println("Неверный ввод! Введите числовой пункт меню.")
+			} else {
+				log.Panic("Ошибка открытия файла логов:", err_open)
+			}
+			defer file.Close() // отложенное закрытие файла
+		
 			continue
 
 		}
-
-		if choice == 1 {
-
+		switch choice{
+		case 1:
 			fmt.Print("Введите строковое выражение для вычисления: \n>>> ")
-			expressionStr, _ := reader.ReadString('\n')
+			expressionStr, err_read := reader.ReadString('\n')
+			if err_read != nil {
+				mw := io.MultiWriter(os.Stdout, file)
+					log.SetOutput(mw)
+				fmt.Println("Ошибка при чтении ввода:", err_read)
+				continue // Продолжаем цикл, если возникла ошибка
+			}
 			expressionStr = strings.TrimSpace(expressionStr)
 			result, err := EvalMathExpr(expressionStr)
 
 			if err != nil {
-				fmt.Println(err)
+				mw := io.MultiWriter(os.Stdout, file)
+					log.SetOutput(mw)
+				log.Println("Ошибка при вычислении выражения: ", err)
+				continue
 			} else {
-				fmt.Println(result)
+				fmt.Println("Результат вычислений: ", result)
 			}
-
-		} else if choice == 2 {
-
+		case 2:
 			fmt.Println("Выход...")
 			os.Exit(0)
 
-		} else {
-
-			fmt.Println("Неверный выбор. Введите корректный пункт меню (1 или 2).")
-
+		default:
+			mw := io.MultiWriter(os.Stdout, file)
+			log.SetOutput(mw)
+			log.Println("Неверный выбор. Введите корректный пункт меню (1 или 2).")
 		}
 	}
 
