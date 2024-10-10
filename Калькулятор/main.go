@@ -1,5 +1,4 @@
 package main
-
 import (
 	"bufio"
 	"fmt"
@@ -63,15 +62,24 @@ func main() {
 				continue // Продолжаем цикл, если возникла ошибка
 			}
 			expressionStr = strings.TrimSpace(expressionStr)
-			result, err := EvalMathExpr(expressionStr)
-
-			if err != nil {
+			
+			if IsValidExpression(expressionStr){
+				root := parseExpression(expressionStr)
+ 				result, err := calculate(root)
+				if err != nil {
 				mw := io.MultiWriter(os.Stdout, file)
 					log.SetOutput(mw)
 				log.Println("Ошибка при вычислении выражения: ", err)
 				continue
+				} else {
+					fmt.Printf("Результат вычисления выражения %s: %f\n", expressionStr, result)
+				}
+				
 			} else {
-				fmt.Println("Результат вычислений: ", result)
+				mw := io.MultiWriter(os.Stdout, file)
+					log.SetOutput(mw)
+				log.Println("Неккоректное выражение! ")
+				continue
 			}
 		case 2:
 			fmt.Println("Выход...")
@@ -83,5 +91,9 @@ func main() {
 			log.Println("Неверный выбор. Введите корректный пункт меню (1 или 2).")
 		}
 	}
+ }
 
+func parseExpression(expression string) *TreeNode {
+ return buildTree(tokenize(expression))
 }
+
