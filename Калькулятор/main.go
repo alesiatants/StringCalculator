@@ -8,7 +8,10 @@ import (
 	"log"
 	"io"
 )
-
+const (
+	Calculation = iota+1
+	Exit
+)
 func main() {
 
 	reader := bufio.NewReader(os.Stdin)
@@ -52,7 +55,7 @@ func main() {
 
 		}
 		switch choice{
-		case 1:
+		case Calculation:
 			fmt.Print("Введите строковое выражение для вычисления: \n>>> ")
 			expressionStr, err_read := reader.ReadString('\n')
 			if err_read != nil {
@@ -81,7 +84,7 @@ func main() {
 				log.Println("Неккоректное выражение! ")
 				continue
 			}
-		case 2:
+		case Exit:
 			fmt.Println("Выход...")
 			os.Exit(0)
 
@@ -96,4 +99,3 @@ func main() {
 func parseExpression(expression string) *TreeNode {
  return buildTree(tokenize(expression))
 }
-
